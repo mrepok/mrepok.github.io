@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiddlls' Story</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #story {
+            font-size: 24px;
+            max-width: 800px;
+            margin: auto;
+            line-height: 1.6;
+        }
+        .highlight {
+            background-color: yellow;
+        }
+        #current-word {
+            font-size: 48px;
+            font-weight: bold;
+            margin-top: 50px;
+            color: darkred;
+            height: 60px;
+        }
+        button {
+            font-size: 20px;
+            margin: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>the tragic tale of tiddlls</h1>
+    <p id="story">
+        once there was a turtle named tiddlls. he had one dream: cross the road and reach the great lettuce patch.
+        he took one step. a car swerved and hit a mailbox. tiddlls took another step. another car swerved, hit a fruit stand. 
+        tiddlls ate an orange slice. soon, a traffic jam formed. helicopters arrived. the news called him "unstoppable road goblin."
+        tiddlls did not know what that meant. he just wanted lettuce. then—betrayal. a child picked him up. 
+        "omg a turtle!!!" tiddlls was airborne. he had never been airborne. he was placed in a tank. there was lettuce. 
+        unlimited lettuce. but tiddlls only stared at the road he would never cross. he let out the slowest, saddest sigh in turtle history.
+    </p>
+
+    <button onclick="speakStory()">▶ Play</button>
+    <button onclick="pauseStory()">⏸ Pause</button>
+    <button onclick="stopStory()">⏹ Stop</button>
+
+    <div id="current-word"></div>
+
+    <script>
+        let speech = new SpeechSynthesisUtterance();
+        let synth = window.speechSynthesis;
+        let words = [];
+        let wordIndex = 0;
+
+        function speakStory() {
+            let storyText = document.getElementById("story").innerText;
+            words = storyText.split(" ");
+            wordIndex = 0;
+            highlightWord();
+
+            speech.text = storyText;
+            speech.lang = "en-US";
+            speech.rate = 1.0;
+            speech.pitch = 1.0;
+
+            speech.onboundary = (event) => {
+                if (event.name === "word") {
+                    wordIndex = getWordIndex(event.charIndex);
+                    highlightWord();
+                    showCurrentWord();
+                }
+            };
+
+            synth.speak(speech);
+        }
+
+        function pauseStory() {
+            if (synth.speaking) {
+                synth.pause();
+            }
+        }
+
+        function stopStory() {
+            synth.cancel();
+            removeHighlight();
+            document.getElementById("current-word").innerText = "";
+        }
+
+        function highlightWord() {
+            let storyElement = document.getElementById("story");
+            let highlightedText = words.map((word, i) =>
+                i === wordIndex ? `<span class="highlight">${word}</span>` : word
+            ).join(" ");
+
+            storyElement.innerHTML = highlightedText;
+        }
+
+        function removeHighlight() {
+            document.getElementById("story").innerHTML = words.join(" ");
+        }
+
+        function showCurrentWord() {
+            document.getElementById("current-word").innerText = words[wordIndex] || "";
+        }
+
+        function getWordIndex(charIndex) {
+            let textUpToChar = words.join(" ").substring(0, charIndex);
+            return textUpToChar.split(" ").length - 1;
+        }
+    </script>
+
+</body>
+</html>
